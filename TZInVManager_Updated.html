@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f1a"><meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="TZInVManager"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%235b8cff%27/%3E%3Ctext x=%2732%27 y=%2742%27 font-size=%2726%27 font-family=%27Arial%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27%3ETZ%3C/text%3E%3C/svg%3E">
+<title>TZInVManager</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#0b0f1a;--surface:#131a2b;--surface2:#1a2338;--line:#26324d;--ink:#e8edf7;--muted:#8d9ab5;--accent:#5b8cff;--accent2:#7c5cff;--green:#34d399;--red:#f87171;--amber:#fbbf24;--nav-h:64px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;-webkit-font-smoothing:antialiased;background-image:radial-gradient(900px 400px at 85% -10%,#5b8cff14,transparent),radial-gradient(700px 400px at -10% 0,#7c5cff10,transparent);background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:650;min-height:44px;transition:transform .08s,filter .15s,background .15s}
+button:active{transform:scale(.97)}
+.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 18px #5b8cff30}
+.primary:hover{filter:brightness(1.08)}
+.secondary{background:#5b8cff1f;color:#a9c1ff;border:1px solid #5b8cff40}
+.plain{background:var(--surface2);border:1px solid var(--line);color:var(--ink)}
+.danger{background:#f871711f;color:var(--red)}
+.top{position:sticky;top:0;z-index:30;background:#0b0f1acc;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(12px + var(--sat)) 20px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{flex:none;background:linear-gradient(135deg,var(--accent),var(--accent2));width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:15px;letter-spacing:-.5px;color:#fff;box-shadow:0 6px 18px #5b8cff40}
+.brand h1{font-size:18px;margin:0;letter-spacing:-.3px;line-height:1.1}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-actions{display:flex;gap:8px}
+.top-actions button{padding:9px 12px;min-height:40px;font-size:13px}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 66px)}
+aside{background:#0e1424;border-right:1px solid var(--line);padding:16px 12px;position:sticky;top:66px;height:calc(100vh - 66px);align-self:start}
+.nav{width:100%;text-align:left;background:transparent;color:var(--muted);margin:3px 0;padding:12px;display:flex;gap:12px;align-items:center;border:1px solid transparent}
+.nav svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav:hover{background:var(--surface)}
+.nav.active{background:#5b8cff1c;color:#b5caff;border-color:#5b8cff33}
+.aside-note{margin:22px 6px 0;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px}
+.aside-note b{color:var(--ink)}
+.main{padding:24px;max-width:1500px;width:100%;margin:auto}
+.page-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+.page-head h2{font-size:24px;margin:0 0 4px;letter-spacing:-.4px}
+.muted{color:var(--muted)}.small{font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.card{background:linear-gradient(180deg,var(--surface),#10172a);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 30px #00000040}
+.metric-label{color:var(--muted);font-size:12px;font-weight:650;text-transform:uppercase;letter-spacing:.05em}
+.metric{font-size:28px;font-weight:780;letter-spacing:-.6px;margin-top:6px}
+.metric-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.cards .card:nth-child(1) .metric{color:#b5caff}.cards .card:nth-child(2) .metric{color:var(--green)}.cards .card:nth-child(3) .metric{color:var(--amber)}
+.panel-title{font-size:16px;font-weight:750;margin:0 0 14px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.field{border:1px solid var(--line);background:#0e1424;color:var(--ink);border-radius:12px;padding:11px 14px;min-width:140px;max-width:100%;min-height:44px;outline:none;transition:border-color .15s,box-shadow .15s}
+.field::placeholder{color:#5f6d8a}
+.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px #5b8cff2e}
+.field.search{flex:1;min-width:220px}
+select.field{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#0e1424;-webkit-overflow-scrolling:touch;max-height:70vh}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th{background:#151d33;color:var(--muted);text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;z-index:1}
+td,th{padding:12px 14px;border-bottom:1px solid #1b2540}
+tbody tr:hover{background:#5b8cff0d}
+tbody tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:750;border:1px solid transparent}
+.pill.green{background:#34d3991f;color:var(--green);border-color:#34d39940}
+.pill.amber{background:#fbbf241f;color:var(--amber);border-color:#fbbf2440}
+.pill.red{background:#f871711f;color:var(--red);border-color:#f8717140}
+.pill.blue{background:#5b8cff1f;color:#a9c1ff;border-color:#5b8cff40}
+.hidden{display:none!important}
+.scan-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:14px}
+.scan-box{border:2px dashed #34456b;border-radius:16px;padding:20px;text-align:center;background:#0e1424}
+.scan-box video{width:100%;max-height:360px;object-fit:cover;border-radius:14px;background:#000}
+.scan-input{display:flex;gap:8px;margin-top:14px}
+.scan-input input{flex:1;min-width:0}
+.result{margin-top:14px;padding:14px;border-radius:14px;background:var(--surface2);border:1px solid var(--line);animation:pop .25s ease}
+.result p{margin:6px 0}
+.result.good{background:#34d3991a;border-color:#34d39955}
+.result.good b{color:var(--green)}
+.result.bad{background:#f871711a;border-color:#f8717155}
+.result.bad b{color:var(--red)}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.form-field input{width:100%;min-width:0}
+.foot{margin-top:16px;color:var(--muted);font-size:12px;text-align:center}
+.toast{position:fixed;bottom:calc(20px + var(--sab));left:50%;transform:translateX(-50%);background:#e8edf7;color:#0b0f1a;font-weight:600;padding:12px 18px;border-radius:14px;box-shadow:0 12px 40px #000a;z-index:50;max-width:92vw;text-align:center}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+::-webkit-scrollbar{height:8px;width:8px}::-webkit-scrollbar-thumb{background:#2a3858;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- Tablet / mobile ---------- */
+@media(max-width:900px){
+ .shell{display:block}
+ body{padding-bottom:calc(var(--nav-h) + var(--sab) + 12px)}
+ aside{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;z-index:40;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:6px 8px calc(6px + var(--sab));background:#0b0f1af2;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:0;border-top:1px solid var(--line)}
+ .nav{flex-direction:column;gap:3px;justify-content:center;align-items:center;text-align:center;padding:7px 2px;font-size:10.5px;font-weight:650;margin:0;min-height:50px;border-radius:12px;white-space:nowrap}
+ .nav svg{width:22px;height:22px}
+ .aside-note{display:none}
+ .main{padding:16px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .scan-grid{grid-template-columns:1fr}
+ .toast{bottom:calc(var(--nav-h) + var(--sab) + 18px)}
+}
+@media(max-width:700px){
+ /* tables become stacked cards */
+ .table-wrap{border:0;background:transparent;max-height:none;overflow:visible}
+ table,thead,tbody,tr,td{display:block;white-space:normal}
+ thead{display:none}
+ tbody{display:grid;gap:10px}
+ tbody tr{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 14px}
+ tbody tr:hover{background:var(--surface)}
+ td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid #1b2540;text-align:right;word-break:break-word}
+ td:last-child{border-bottom:0}
+ td::before{content:attr(data-label);flex:none;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left}
+ td.empty{display:block;text-align:center}td.empty::before{content:none}
+ td button{width:100%;min-height:44px}
+ td[data-label="Action"],td[data-label="Save"]{display:block;padding-top:12px}
+ td[data-label="Action"]::before,td[data-label="Save"]::before{content:none}
+ td input.field{width:110px!important;text-align:right}
+}
+@media(max-width:520px){
+ .top{padding:calc(10px + var(--sat)) 14px 10px}
+ .brand p{display:none}
+ .top-actions button{padding:8px 11px;font-size:12.5px}
+ .main{padding:14px 12px}
+ .cards{gap:10px}.card{padding:14px;border-radius:16px}
+ .metric{font-size:24px}
+ .page-head h2{font-size:21px}
+ .page-head .toolbar{width:100%}.page-head .toolbar button{flex:1}
+ .form-grid{grid-template-columns:1fr}
+ .field,.scan-input input{font-size:16px} /* stops iOS zoom on focus */
+ .scan-input{flex-direction:column}.scan-input button{width:100%}
+ .scan-box{padding:14px}
+ .filters .field,.filters .field.search{flex:1 1 100%;min-width:0}
+}
+</style></head><body>
+<header class="top"><div class="brand"><div class="logo">TZ</div><div><h1>TZInVManager</h1><p>Returns · Inventory · Barcode scanning</p></div></div><div class="top-actions"><button class="plain" onclick="exportWorkbook()">↓ Excel</button><button class="plain" onclick="backupJSON()">Backup</button></div></header>
+<div class="shell"><aside>
+<button class="nav active" data-page="dashboard" onclick="showPage('dashboard')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Overview</span></button>
+<button class="nav" data-page="stock-scan" onclick="showPage('stock-scan')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg><span>Stock Scan</span></button>
+ <button class="nav" data-page="return-scan" onclick="showPage('return-scan')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>Return Scan</span></button>
+<button class="nav" data-page="returns" onclick="showPage('returns')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>Returns</span></button>
+<button class="nav" data-page="inventory" onclick="showPage('inventory')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span>Stock</span></button>
+<button class="nav" data-page="logs" onclick="showPage('logs')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg><span>Log</span></button>
+ <button class="nav" data-page="restore" onclick="showPage('restore')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v3h14v-3"/></svg><span>Restore</span></button>
+<div class="aside-note"><b>Saved on this device</b><br>Changes save locally. Use Restore to recover from an Excel/JSON backup.</div>
+</aside><main class="main">
+<section id="page-dashboard">
+<div class="page-head"><div><h2>Overview</h2><div class="muted">Your master return and inventory workspace.</div></div><div class="toolbar"><button class="primary" onclick="showPage('return-scan')">⌗ Scan a return</button><button class="plain" onclick="exportWorkbook()">↓ Excel</button></div></div>
+<div class="cards" id="metrics"></div>
+<div class="card"><h3 class="panel-title">Recent activity</h3><div id="recent"></div></div>
+<div class="foot">TZInVManager · Separate inventory and return scanners · Restore from backup.</div>
+</section>
+<section id="page-return-scan" class="hidden">
+<div class="page-head"><div><h2>Return Scanner</h2><div class="muted">Dedicated scanner for marking matching return records as received.</div></div></div>
+<div class="scan-grid"><div class="card"><h3 class="panel-title">Scan a return barcode</h3><div class="scan-box"><div id="cameraPlaceholder"><div style="font-size:42px;line-height:1;margin-bottom:6px;color:var(--accent)">⌗</div><b>Camera scanner</b><p class="muted small">Camera requires HTTPS and browser permission. If camera scanning is unavailable, type the barcode below.</p></div><video id="returnVideo" class="hidden" playsinline muted></video><div class="toolbar" style="justify-content:center;margin-top:12px"><button class="primary" id="cameraBtn" onclick="startCamera()">Start camera</button><button class="plain hidden" id="stopReturnCameraBtn" onclick="stopReturnCamera()">Stop camera</button></div></div><div class="scan-input"><input class="field" id="returnScanCode" placeholder="Tracking ID / barcode" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" onkeydown="if(event.key==='Enter')processScan()"><button class="primary" onclick="processScan()">Process</button></div><p class="muted small">Accepted matches: Tracking ID, Return ID, Order Item ID, SKU or FSN. Prefer a unique tracking/return ID.</p><div id="scanResult"></div></div>
+<div class="card"><h3 class="panel-title">What happens after a match?</h3><p>1. The return is marked <b>Received</b>.</p><p>2. Scan date/time and product details are saved in the log.</p><p>3. Received quantity is added to the inventory's <b>Returns Received</b> count.</p><p>4. Duplicate scans are rejected to prevent double-counting.</p><hr><h3 class="panel-title">Current scan summary</h3><div id="scanSummary" class="muted">No scan processed in this session.</div></div></div>
+</section>
+
+<section id="page-stock-scan" class="hidden">
+ <div class="page-head"><div><h2>Inventory Scanner</h2><div class="muted">Scan a product barcode to add stock to the matching SKU.</div></div></div>
+ <div class="scan-grid"><div class="card"><h3 class="panel-title">Scan an inventory item</h3>
+ <div class="scan-box"><div id="stockCameraPlaceholder"><div style="font-size:42px;line-height:1;margin-bottom:6px;color:var(--accent)">▦</div><b>Inventory camera scanner</b><p class="muted small">Point the camera at the product barcode. Camera access requires HTTPS and permission.</p></div>
+ <video id="stockVideo" class="hidden" playsinline muted></video><div class="toolbar" style="justify-content:center;margin-top:12px"><button class="primary" id="stockCameraBtn" onclick="startStockCamera()">Start inventory camera</button><button class="plain hidden" id="stockStopCameraBtn" onclick="stopStockCamera()">Stop camera</button></div></div>
+ <div class="scan-input"><input class="field" id="stockScanCode" placeholder="Product barcode / SKU / FSN" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')processInventoryScan()"><input class="field" id="stockScanQty" type="number" min="1" step="1" value="1" aria-label="Quantity to add" style="max-width:100px"><button class="primary" onclick="processInventoryScan()">Add stock</button></div>
+ <p class="muted small">Each successful inventory scan adds the selected quantity. Repeated product scans are allowed intentionally.</p><div id="stockScanResult"></div></div>
+ <div class="card"><h3 class="panel-title">Inventory scan rules</h3><p>1. Scan a barcode matching an Inventory SKU or FSN.</p><p>2. The app shows the matched product and updated stock count.</p><p>3. The quantity is added to <b>Stock Adjustments</b>.</p><p>4. Every change is written to the Scan Log.</p><hr><h3 class="panel-title">Recent inventory scan</h3><div id="stockScanSummary" class="muted">No inventory scan processed yet.</div></div></div>
+</section>
+\n<section id="page-returns" class="hidden">
+<div class="page-head"><div><h2>Returns</h2><div class="muted">Search existing return records and track receipt status.</div></div><div class="toolbar"><button class="plain" onclick="exportWorkbook()">Download Excel</button></div></div>
+<div class="card"><div class="filters"><input class="field search" id="returnSearch" placeholder="Search tracking ID, order, SKU, product…" oninput="renderReturns()"><select class="field" id="returnStatusFilter" onchange="renderReturns()"><option value="all">All statuses</option><option value="Pending">Pending</option><option value="Received">Received</option></select></div><div id="returnsTable" class="table-wrap"></div><p class="muted small" id="returnCount"></p></div>
+</section>
+<section id="page-inventory" class="hidden">
+<div class="page-head"><div><h2>Inventory Management</h2><div class="muted">Manage opening stock and adjustments. Received returns update automatically after a successful scan.</div></div><div class="toolbar"><button class="secondary" onclick="addInventory()">＋ Add SKU</button><button class="plain" onclick="exportWorkbook()">↓ Download Excel</button></div></div>
+<div class="cards" id="inventoryMetrics"></div>
+<div class="card"><div class="filters"><input class="field search" id="inventorySearch" placeholder="Search SKU, FSN or product…" oninput="renderInventory()"></div><div id="inventoryTable" class="table-wrap"></div><p class="muted small">Current Stock = Opening Stock + Returns Received + Stock Adjustments. Set opening stock for products already on hand. Check returned items for resale condition before treating them as sellable stock.</p></div>
+</section>
+
+<section id="page-restore" class="hidden">
+ <div class="page-head"><div><h2>Upload & Restore Data</h2><div class="muted">Restore data if browser storage/history is cleared, or import an updated workbook.</div></div></div>
+ <div class="scan-grid"><div class="card"><h3 class="panel-title">Upload master file</h3>
+ <p class="muted">Choose an Excel workbook (.xlsx/.xls) exported by this app, your original Flipkart return workbook, or a JSON backup made with the Backup button.</p>
+ <input class="field" id="restoreFile" type="file" accept=".xlsx,.xls,.json,application/json" style="width:100%">
+ <div class="toolbar" style="margin-top:12px"><button class="primary" onclick="restoreFromFile()">Upload & restore</button><button class="plain" onclick="downloadBackupJSON()">Download JSON backup</button></div>
+ <div id="restoreResult" class="result hidden"></div></div>
+ <div class="card"><h3 class="panel-title">Before restoring</h3><p>• Restore replaces the current browser data with the selected backup/workbook.</p><p>• When present, the app imports Returns, Inventory, and Scan Log sheets.</p><p>• Older return workbooks without receipt-status columns import as pending.</p><p>• Keep a recent Excel or JSON backup somewhere safe.</p><hr><p class="muted small">This is local browser storage, not cloud sync. Data cannot recover itself after browser data is cleared; use this page to upload a backup.</p></div></div>
+</section>
+\n<section id="page-logs" class="hidden">
+<div class="page-head"><div><h2>Scan Log</h2><div class="muted">Audit trail of accepted and rejected barcode scans.</div></div><button class="plain" onclick="exportWorkbook()">↓ Download Excel</button></div>
+<div class="card"><div id="logsTable" class="table-wrap"></div></div>
+</section>
+</main></div><div id="toast" class="toast hidden"></div>
+<script>
+const SEED={"headers": ["Location ID", "Order ID", "Order Item ID", "Return ID", "Tracking ID", "Shipment ID", "Replacement Order Item ID", "SKU", "FSN", "Product", "Total Price", "Quantity", "FF Type", "Return Requested Date", "Return Approval Date", "Completed Date", "Out For Delivery Date", "Return Delivery Promise Date", "Picked Up Date", "Shipment Type", "Return Status", "Completion Status", "Return Type", "Return Reason", "Return Sub-reason", "Comments", "Vendor Name", "Location Name", "Flyer Status", "Flyer Captured", "Flyer Actual", "Delivery Proof Time", "OBD Eligible", "OBD Status", "OBD Remarks", "Delivery Proof OTC", "Bag Tracking ID", "Order Type", "Customer GSTIN", "Customer Company Name", "IRN Number", "Invoice Number", "Invoice Date"], "returns": [["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438262538035745100", "438262538035745100", "10284091500153403007791104", "FMPC6360724321", "A-4846410802371864", null, "K_04", "VWCHP4F8JQNZKHCF", "KNEVARA Polyester, Microfiber Vehicle Washing  Cloth", 162.0, 1.0, "NON_FBF", "2026-08-08T00:00:00", "2026-08-08T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "expensive_now", "Price", "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "✅ Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438259199125374100", "438259199125374100", "10220201390153359182172160", "FMPC6361622233", "A-5156239465731500", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 171.0, 1.0, "NON_FBF", "2026-08-08T00:00:00", "2026-08-08T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "mind_changed", "Bsbzjzjjz", "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338241212543466100", "338241212543466100", "10480788830153159049515008", "FMPC6357801240", "A-5186268872343302", null, "kneevara_04", "VWCHNVTTKGVPNXCY", "KNEEVARA Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-07T00:00:00", "2026-08-07T00:00:00", null, null, "2026-08-19T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338216528301971100", "338216528301971100", "10167947480153098939076608", "FMPC6348897340", "A-5443831347169668", null, "kneevara_04", "VWCHNVTTKGVPNXCY", "KNEEVARA Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-07T00:00:00", "2026-08-07T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "ORC_validated with customer", "ORC_validated with customer", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438226323657661100", "438226323657661100", "1025744550152803669090 po304", "FMPC6349418474", "A-4827434900216593", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 182.0, 1.0, "NON_FBF", "2026-08-06T00:00:00", "2026-08-06T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438202224955644100", "438202224955644100", "10480788830152707468382208", "FMPC6339534683", "A-7285996163388645", null, "kneevara_04", "VWCHNVTTKGVPNXCY", "KNEEVARA Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-06T00:00:00", "2026-08-06T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Curfew/Strike", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338226938106802100", "338226938106802100", "10276010220152387137675264", "FMPC6349441026", "A-5547888873746196", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 182.0, 1.0, "NON_FBF", "2026-08-05T00:00:00", "2026-08-05T00:00:00", null, null, "2026-08-19T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "ORC_validated with customer", "ORC_validated with customer", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438133468168175100", "438133468168175100", "10480788830152114375139328", "FMPC6317958782", "A-4425294240211603", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 170.0, 1.0, "NON_FBF", "2026-08-04T00:00:00", "2026-08-04T00:00:00", null, null, "2026-08-19T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338223915609208100", "338223915609208100", "10176374830151975258673152", "FMPC6346621149", "A-4902541109926138", null, "microfiber09", "VWCHFM2DYVXGNHE4", "Amonest Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-04T00:00:00", "2026-08-04T00:00:00", null, null, "2026-08-18T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "delivery_time_long", "Long time ", "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438240723380979100", "438240723380979100", "10195639080151609722503168", "FMPC6352804226", "A-4628266248711012", null, "microfiber 10", "VWCHGADTYHDWDGXZ", "AKDC Microfiber Vehicle Washing  Cloth", 168.0, 1.0, "NON_FBF", "2026-08-03T00:00:00", "2026-08-03T00:00:00", null, null, "2026-08-13T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "delivery_time_long", "Order lete issue ", "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338164949923662100", "338164949923662100", "10537089510151413848604672", "FMPC6327503379", "A-5335978254635441", null, "microfiber09", "VWCHFM2DYVXGNHE4", "Amonest Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-02T00:00:00", "2026-08-02T00:00:00", null, null, "2026-08-23T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338158976297740100", "338158976297740100", "10530735790151360111235072", "SF3329106428F", "A-7271109783069771", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 177.0, 1.0, "NON_FBF", "2026-08-02T00:00:00", "2026-08-02T00:00:00", null, null, "2026-08-23T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "Client_Instructions_For_RTO", "Client_Instructions_For_RTO", null, "shadowfax-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438175506447979100", "438175506447979100", "10212335210151254778093568", "FMPC6336157980", "A-7355856634050734", null, "kneevara_04", "VWCHNVTTKGVPNXCY", "KNEEVARA Microfiber Vehicle Washing  Cloth", 155.0, 1.0, "NON_FBF", "2026-08-02T00:00:00", "2026-08-02T00:00:00", null, null, "2026-08-16T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "ORC_validated with customer", "ORC_validated with customer", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438164663328020100", "438164663328020100", "10537089510150686441099264", "FMPC6327478817", "A-3861935943591014", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 177.0, 1.0, "NON_FBF", "2026-07-31T00:00:00", "2026-07-31T00:00:00", null, null, "2026-08-18T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD438197854919808100", "438197854919808100", "10310214650150685482274816", "FMPC6338808551", "A-5335824394972249", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 182.0, 1.0, "NON_FBF", "2026-07-31T00:00:00", "2026-07-31T00:00:00", null, null, "2026-08-14T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "order_cancelled", "Attempts_Exhausted", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338051719074858100", "338051719074858100", "10394540530150525695840256", "FMPP4136159017", "A-4233890279436405", null, "microfiber09", "VWCHFM2DYVXGNHE4", "Amonest Microfiber Vehicle Washing  Cloth", 143.0, 1.0, "NON_FBF", "2026-07-31T00:00:00", "2026-07-31T00:00:00", null, null, "2026-08-18T00:00:00", null, "NORMAL", "in_transit", "Open", "courier_return", "Breach Related", "Breach Related", null, "flipkartlogistics", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null], ["LOC74a9053b82c24ee99ba8cce78cf3622e", "OD338068964658208100", "338068964658208100", "10163024790149542795870208", "FMPC6290827800", "A-3199867446112304", null, "SS-P-5", "VWCHM2FHKCHY5NTJ", "soxsense Microfiber Vehicle Washing  Cloth", 170.0, 1.0, "NON_FBF", "2026-07-28T00:00:00", "2026-07-28T00:00:00", null, null, null, null, "NORMAL", "in_transit", "Open", "courier_return", "Shipment_EOB_Ageing", "Shipment_EOB_Ageing", null, "flipkartlogistics-cod", "MEDINIPUR : 721101", null, null, null, null, null, "❌ Not Received", null, null, null, "B2C", null, null, null, null, null]], "scanHeaders": ["Scanned ID", "Scan Time", "Return_Id", "Result"], "scanRows": [["FMPC6360724321", null, "Not Found", "✅ Received"], [" ", null, null, null]]};
+const DB_NAME='flipkart-master-db-v1', DB_STORE='workspace';
+let state={returns:[],inventory:[],logs:[],initialized:false}, db=null, stream=null, scanLoop=null, lastCode='', lastCodeAt=0, latestScan=null;
+const $=id=>document.getElementById(id);
+function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(DB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function getStored(){return new Promise((resolve,reject)=>{const r=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get('state');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+function save(){return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(state,'state');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+function keyOf(x){return String(x??'').trim()}
+function fromSeed(){let ix={}; for(const r of SEED.returns){const sku=keyOf(r[7]);if(!sku)continue;if(!ix[sku])ix[sku]={sku,product:r[9]||'',fsn:r[8]||'',opening:0,received:0,adjust:0,updated:''}};return {returns:SEED.returns.map((r,i)=>({id:'r'+i,values:r,received:false,receivedAt:''})),inventory:Object.values(ix),logs:SEED.scanRows.filter(r=>r.some(v=>v!==null&&v!=='' )).map((r,i)=>({code:keyOf(r[0]),time:r[1]||'',returnId:r[2]||'',result:r[3]||'Imported history',sku:'',product:'',qty:0,legacy:true,id:'old'+i})),initialized:true}}
+async function init(){try{db=await openDB();const old=await getStored();if(old&&old.initialized)state=old;else{state=fromSeed();await save()}}catch(e){state=fromSeed();toast('Persistent browser storage unavailable. Keep Excel backups.')}renderAll()}
+function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3000)}
+function showPage(p){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$('page-'+p).classList.remove('hidden');document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===p));if(p==='returns')renderReturns();if(p==='inventory')renderInventory();if(p==='logs')renderLogs();if(p==='dashboard')renderDashboard();if(p==='stock-scan')stopReturnCamera();if(p==='return-scan')stopStockCamera();if(p==='stock-scan')stopReturnCamera();if(p==='return-scan')stopStockCamera();window.scrollTo(0,0)}
+function fmtDate(v){if(!v)return '—';let d=new Date(v);return isNaN(d)?String(v):d.toLocaleString()}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function statusPill(s){return `<span class="pill ${s==='Received'?'green':'amber'}">${esc(s)}</span>`}
+function renderDashboard(){let received=state.returns.filter(r=>r.received).length,pending=state.returns.length-received,skus=state.inventory.length,stock=state.inventory.reduce((a,i)=>a+num(i.opening)+num(i.received)+num(i.adjust),0);$('metrics').innerHTML=[['Total returns',state.returns.length,'Imported return records'],['Received',received,'Successfully scanned'],['Pending returns',pending,'Awaiting receipt scan'],['Inventory SKUs',skus,'Current stock units: '+stock]].map(x=>`<div class="card"><div class="metric-label">${x[0]}</div><div class="metric">${x[1]}</div><div class="metric-sub">${x[2]}</div></div>`).join('');let recent=state.logs.slice().reverse().slice(0,6);$('recent').innerHTML=recent.length?`<div class="table-wrap"><table><thead><tr><th>Time</th><th>Scanned code</th><th>Result</th><th>Product</th></tr></thead><tbody>${recent.map(l=>`<tr><td data-label="Time">${esc(fmtDate(l.time))}</td><td data-label="Code">${esc(l.code)}</td><td data-label="Result">${esc(l.result)}</td><td data-label="Product">${esc(l.product||'—')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No scan activity yet.</div>'}
+function renderReturns(){let q=keyOf($('returnSearch')?.value).toLowerCase(),filter=$('returnStatusFilter')?.value||'all';let list=state.returns.filter(r=>{let status=r.received?'Received':'Pending';return (filter==='all'||filter===status)&&(!q||[r.values[1],r.values[3],r.values[4],r.values[7],r.values[8],r.values[9]].some(v=>String(v??'').toLowerCase().includes(q)))});let cols=[['Tracking ID',4],['Order ID',1],['SKU',7],['Product',9],['Qty',11],['Return Status',20]];$('returnsTable').innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}<th>Receipt</th><th>Received at</th><th>Action</th></tr></thead><tbody>${list.map(r=>`<tr>${cols.map(c=>`<td data-label="${c[0]}">${esc(r.values[c[1]])}</td>`).join('')}<td data-label="Receipt">${statusPill(r.received?'Received':'Pending')}</td><td data-label="Received at">${esc(fmtDate(r.receivedAt))}</td><td data-label="Action"><button class="secondary" onclick="manualReceive('${r.id}')">${r.received?'View':'Mark received'}</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">No matching returns.</td></tr>'}</tbody></table>`;$('returnCount').textContent=`Showing ${list.length} of ${state.returns.length} returns`}
+function num(v){let n=Number(v);return Number.isFinite(n)?n:0}
+function renderInventory(){let q=keyOf($('inventorySearch')?.value).toLowerCase();let list=state.inventory.filter(i=>[i.sku,i.fsn,i.product].some(v=>String(v||'').toLowerCase().includes(q)));let total=list.reduce((a,i)=>a+num(i.opening)+num(i.received)+num(i.adjust),0);$('inventoryMetrics').innerHTML=[['SKU records',list.length],['Opening stock',list.reduce((a,i)=>a+num(i.opening),0)],['Returns received',list.reduce((a,i)=>a+num(i.received),0)],['Current stock',total]].map(x=>`<div class="card"><div class="metric-label">${x[0]}</div><div class="metric">${x[1]}</div></div>`).join('');$('inventoryTable').innerHTML=`<table><thead><tr><th>SKU</th><th>Product</th><th>FSN</th><th>Opening stock</th><th>Returns received</th><th>Adjustments</th><th>Current stock</th><th>Save</th></tr></thead><tbody>${list.map(i=>`<tr><td data-label="SKU"><b>${esc(i.sku)}</b></td><td data-label="Product">${esc(i.product)}</td><td data-label="FSN">${esc(i.fsn)}</td><td data-label="Opening"><input class="field" style="width:90px;min-width:70px" type="number" value="${num(i.opening)}" id="open-${encodeURIComponent(i.sku)}"></td><td data-label="Returns recv.">${num(i.received)}</td><td data-label="Adjust"><input class="field" style="width:90px;min-width:70px" type="number" value="${num(i.adjust)}" id="adj-${encodeURIComponent(i.sku)}"></td><td data-label="In stock"><b>${num(i.opening)+num(i.received)+num(i.adjust)}</b></td><td data-label="Save"><button class="secondary" onclick="saveInventory('${encodeURIComponent(i.sku)}')">Save</button></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No matching SKUs.</td></tr>'}</tbody></table>`}
+function renderLogs(){$('logsTable').innerHTML=`<table><thead><tr><th>Time</th><th>Scanned code</th><th>Result</th><th>Return ID</th><th>SKU</th><th>Product</th><th>Qty</th></tr></thead><tbody>${state.logs.slice().reverse().map(l=>`<tr><td data-label="Time">${esc(fmtDate(l.time))}</td><td data-label="Code">${esc(l.code)}</td><td data-label="Result"><span class="pill ${String(l.result).toLowerCase().includes('received')||String(l.result).toLowerCase().includes('success')?'green':'red'}">${esc(l.result)}</span></td><td data-label="Return ID">${esc(l.returnId)}</td><td data-label="SKU">${esc(l.sku)}</td><td data-label="Product">${esc(l.product)}</td><td data-label="Qty">${esc(l.qty||'—')}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No scan records yet.</td></tr>'}</tbody></table>`}
+function renderAll(){renderDashboard();renderReturns();renderInventory();renderLogs()}
+async function saveInventory(encoded){let sku=decodeURIComponent(encoded),i=state.inventory.find(x=>x.sku===sku);if(!i)return;i.opening=num($('open-'+encoded).value);i.adjust=num($('adj-'+encoded).value);i.updated=new Date().toISOString();await save();renderAll();toast('Inventory saved')}
+async function addInventory(){let sku=prompt('Enter a unique SKU:');if(!sku||!sku.trim())return;sku=sku.trim();if(state.inventory.some(i=>i.sku.toLowerCase()===sku.toLowerCase()))return toast('That SKU already exists');let product=prompt('Product name:')||'';let fsn=prompt('FSN (optional):')||'';state.inventory.push({sku,product,fsn,opening:0,received:0,adjust:0,updated:new Date().toISOString()});await save();renderAll();toast('SKU added')}
+function findReturn(code){let fields=[4,3,2,1,7,8];let matches=state.returns.filter(r=>fields.some(j=>keyOf(r.values[j]).toLowerCase()===code.toLowerCase()));return matches}
+async function processScan(value){let code=keyOf(value??$('returnScanCode').value);if(!code)return toast('Enter or scan a barcode');$('returnScanCode').value=code;let found=findReturn(code),now=new Date().toISOString();if(found.length===0){state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:'',result:'Not found',sku:'',product:'',qty:0});await save();renderAll();showScanResult(false,'Barcode not found','No return record matches this code. Check the label or search in Returns.');return}if(found.length>1){state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:'',result:'Ambiguous match',sku:'',product:'',qty:0});await save();renderAll();showScanResult(false,'Multiple matches','This barcode matches multiple records. Scan a unique Tracking ID or Return ID instead.');return}let r=found[0],sku=keyOf(r.values[7]),qty=Math.max(1,num(r.values[11])||1),inv=state.inventory.find(i=>i.sku===sku);if(r.received){state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:r.values[3]||'',result:'Duplicate rejected',sku,product:r.values[9]||'',qty:0});await save();renderAll();showScanResult(false,'Already received','This return was already received on '+fmtDate(r.receivedAt)+'. Inventory was not changed again.',r);return}r.received=true;r.receivedAt=now;if(inv){inv.received=num(inv.received)+qty;inv.updated=now}else{inv={sku,product:r.values[9]||'',fsn:r.values[8]||'',opening:0,received:qty,adjust:0,updated:now};state.inventory.push(inv)}state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:r.values[3]||'',result:'Received successfully',sku,product:r.values[9]||'',qty});await save();renderAll();showScanResult(true,'Return marked Received',`Product: ${r.values[9]||'—'} · SKU: ${sku||'—'} · Quantity added: ${qty} · Current stock: ${num(inv.opening)+num(inv.received)+num(inv.adjust)}`,r);$('returnScanCode').value='';}
+function showScanResult(ok,title,msg,r){latestScan=r||null;$('scanResult').innerHTML=`<div class="result ${ok?'good':'bad'}"><b>${ok?'✓':'!'} ${esc(title)}</b><p>${esc(msg)}</p>${r?`<div class="small">Tracking ID: ${esc(r.values[4])}<br>Order ID: ${esc(r.values[1])}<br>Return ID: ${esc(r.values[3])}<br>Receipt time: ${esc(fmtDate(r.receivedAt))}</div>`:''}</div>`;$('scanSummary').textContent=title+' — '+new Date().toLocaleTimeString()}
+async function manualReceive(id){let r=state.returns.find(x=>x.id===id);if(!r)return;if(r.received){showPage('return-scan');showScanResult(true,'Already received','Previously received; no inventory change.',r);return}if(confirm('Mark this return as received and add its quantity to inventory?')){showPage('return-scan');await processScan(r.values[4]||r.values[3]||r.values[1])}}
+
+async function runCamera(videoId,placeholderId,startBtnId,stopBtnId,mode){
+ if(!navigator.mediaDevices?.getUserMedia){toast('Camera requires HTTPS and browser support.');return}
+ if(!('BarcodeDetector'in window)){toast('BarcodeDetector is not supported in this browser. Try Chrome on Android or use manual entry.');return}
+ try{
+  let detector=new BarcodeDetector({formats:['code_128','code_39','ean_13','ean_8','upc_a','upc_e','qr_code','itf','codabar']});
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  const video=$(videoId);video.srcObject=stream;video.classList.remove('hidden');$(placeholderId).classList.add('hidden');$(startBtnId).classList.add('hidden');$(stopBtnId).classList.remove('hidden');await video.play();
+  async function tick(){if(!stream)return;try{const codes=await detector.detect(video);if(codes.length){let c=codes[0].rawValue,now=Date.now();if(c&&(c!==lastCode||now-lastCodeAt>3000)){lastCode=c;lastCodeAt=now;if(mode==='stock')await processInventoryScan(c);else await processScan(c)}}}catch(e){}scanLoop=requestAnimationFrame(tick)}tick()
+ }catch(e){toast('Unable to open camera. Check permission and HTTPS.')}
+}
+function startCamera(){runCamera('returnVideo','cameraPlaceholder','cameraBtn','stopReturnCameraBtn','return')}
+function startStockCamera(){runCamera('stockVideo','stockCameraPlaceholder','stockCameraBtn','stockStopCameraBtn','stock')}
+function stopReturnCamera(){if(scanLoop)cancelAnimationFrame(scanLoop);scanLoop=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if($('returnVideo')){$('returnVideo').classList.add('hidden');$('cameraPlaceholder').classList.remove('hidden');$('cameraBtn').classList.remove('hidden');$('stopReturnCameraBtn').classList.add('hidden')}}
+function stopStockCamera(){if(scanLoop)cancelAnimationFrame(scanLoop);scanLoop=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if($('stockVideo')){$('stockVideo').classList.add('hidden');$('stockCameraPlaceholder').classList.remove('hidden');$('stockCameraBtn').classList.remove('hidden');$('stockStopCameraBtn').classList.add('hidden')}}
+function stopCamera(){stopReturnCamera()}
+async function processInventoryScan(value){
+ let code=keyOf(value??$('stockScanCode').value);if(!code)return toast('Enter or scan a product barcode');
+ let qty=Math.floor(num($('stockScanQty').value));if(qty<1){toast('Quantity must be at least 1');return}
+ $('stockScanCode').value=code;let matches=state.inventory.filter(i=>[i.sku,i.fsn].some(v=>keyOf(v).toLowerCase()===code.toLowerCase()));let now=new Date().toISOString();
+ if(matches.length===0){state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:'',result:'Inventory item not found',sku:'',product:'',qty:0});await save();renderAll();$('stockScanResult').innerHTML='<div class="result bad"><b>Item not found</b><p>No Inventory SKU or FSN matches this barcode. Add the SKU in Inventory first, or scan a code that maps to it.</p></div>';return}
+ if(matches.length>1){state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:'',result:'Ambiguous inventory barcode',sku:'',product:'',qty:0});await save();renderAll();$('stockScanResult').innerHTML='<div class="result bad"><b>Multiple products matched</b><p>This barcode maps to multiple SKUs. Use a unique product barcode/SKU.</p></div>';return}
+ let i=matches[0],before=num(i.opening)+num(i.received)+num(i.adjust);i.adjust=num(i.adjust)+qty;i.updated=now;let after=num(i.opening)+num(i.received)+num(i.adjust);
+ state.logs.push({id:crypto.randomUUID(),code,time:now,returnId:'',result:'Inventory stock added',sku:i.sku,product:i.product,qty});await save();renderAll();
+ $('stockScanResult').innerHTML=`<div class="result good"><b>✓ Inventory updated</b><p>${esc(i.product||i.sku)}</p><div class="small">SKU: ${esc(i.sku)} · Added: ${qty} · Previous stock: ${before} · Current stock: ${after}</div></div>`;
+ $('stockScanSummary').textContent=`${i.sku}: +${qty} units at ${new Date(now).toLocaleTimeString()}`;$('stockScanCode').value=''
+}
+async function restoreFromFile(){
+ const file=$('restoreFile').files?.[0];if(!file){toast('Choose an Excel or JSON backup file first.');return}
+ try{
+  let imported;
+  if(file.name.toLowerCase().endsWith('.json')){
+   const raw=JSON.parse(await file.text());
+   if(raw&&Array.isArray(raw.returns)&&Array.isArray(raw.inventory)&&Array.isArray(raw.logs))imported=raw;
+   else throw new Error('JSON file is not a valid TZInVManager backup.');
+  }else{
+   if(!window.XLSX)throw new Error('Excel reader library unavailable. Connect to the internet and retry.');
+   const book=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});
+   const findSheet=(names)=>{for(const n of names){const actual=book.SheetNames.find(s=>s.toLowerCase()===n.toLowerCase());if(actual)return XLSX.utils.sheet_to_json(book.Sheets[actual],{header:1,defval:null,raw:false})}return null};
+   const ret=findSheet(['Returns','Flipkart_Returns','Flipkart Returns']);if(!ret||!ret.length)throw new Error('Could not find a Returns or Flipkart_Returns sheet.');
+   const rh=ret[0].map(v=>String(v??'').trim()),statusIdx=rh.findIndex(v=>v.toLowerCase()==='received status'),atIdx=rh.findIndex(v=>v.toLowerCase()==='received at');
+   const dataEnd=statusIdx>=0?statusIdx:(atIdx>=0?atIdx:rh.length);
+   const importedReturns=ret.slice(1).filter(r=>r.some(v=>v!==null&&v!=='')).map((r,i)=>({id:'r'+i,values:r.slice(0,dataEnd),received:statusIdx>=0?String(r[statusIdx]||'').toLowerCase()==='received':false,receivedAt:atIdx>=0?(r[atIdx]||''):''}));
+   const invSheet=findSheet(['Inventory']);let inventory=[];
+   if(invSheet&&invSheet.length>1){const ih=invSheet[0].map(v=>String(v??'').trim().toLowerCase());const ix=(...names)=>ih.findIndex(h=>names.includes(h));inventory=invSheet.slice(1).filter(r=>r.some(v=>v!==null&&v!=='')).map(r=>({sku:String(r[ix('sku')]??'').trim(),product:r[ix('product')]||'',fsn:r[ix('fsn')]||'',opening:num(r[ix('opening stock')]),received:num(r[ix('returns received')]),adjust:num(r[ix('stock adjustments')]),updated:r[ix('last updated')]||''})).filter(i=>i.sku)}
+   if(!inventory.length){let map={};for(const r of importedReturns){let sku=keyOf(r.values[7]);if(sku&&!map[sku])map[sku]={sku,product:r.values[9]||'',fsn:r.values[8]||'',opening:0,received:0,adjust:0,updated:''}}inventory=Object.values(map)}
+   const logsSheet=findSheet(['Scan Log','Received_Scans']);let logs=[];
+   if(logsSheet&&logsSheet.length>1){let lh=logsSheet[0].map(v=>String(v??'').trim().toLowerCase());const ix=(...names)=>lh.findIndex(h=>names.includes(h));logs=logsSheet.slice(1).filter(r=>r.some(v=>v!==null&&v!=='')).map((r,i)=>({id:'import'+i,code:String(r[ix('scanned code','scanned id')]??r[0]??''),time:r[ix('scan time')]||r[1]||'',returnId:r[ix('matched return id','return_id')]||r[2]||'',result:r[ix('result')]||r[3]||'Imported history',sku:r[ix('sku')]||'',product:r[ix('product')]||'',qty:num(r[ix('quantity')])}))}
+   imported={returns:importedReturns,inventory,logs,initialized:true};
+  }
+  imported.initialized=true;
+  if(!Array.isArray(imported.returns)||!Array.isArray(imported.inventory)||!Array.isArray(imported.logs))throw new Error('The selected backup is missing required data sections.');
+  if(!confirm(`Restore ${imported.returns.length} return records, ${imported.inventory.length} inventory SKUs, and ${imported.logs.length} log entries? This replaces the current browser data.`))return;
+  state=imported;await save();renderAll();$('restoreResult').classList.remove('hidden');$('restoreResult').className='result good';$('restoreResult').innerHTML=`<b>✓ Restore complete</b><p>Loaded ${state.returns.length} returns, ${state.inventory.length} inventory SKUs, and ${state.logs.length} scan log entries.</p>`;toast('Master data restored successfully')
+ }catch(e){$('restoreResult').classList.remove('hidden');$('restoreResult').className='result bad';$('restoreResult').textContent='Restore failed: '+e.message}
+}
+function downloadBackupJSON(){backupJSON()}
+
+function exportWorkbook(){if(!window.XLSX){toast('Excel export library needs internet access.');return}let wb=XLSX.utils.book_new();let retHeaders=[...SEED.headers,'Received Status','Received At'];let retRows=state.returns.map(r=>[...r.values,r.received?'Received':'Pending',r.receivedAt||'']);XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([retHeaders,...retRows]),'Returns');let invRows=[['SKU','Product','FSN','Opening Stock','Returns Received','Stock Adjustments','Current Stock','Last Updated'],...state.inventory.map(i=>[i.sku,i.product,i.fsn,num(i.opening),num(i.received),num(i.adjust),num(i.opening)+num(i.received)+num(i.adjust),i.updated||''])];XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(invRows),'Inventory');let logRows=[['Scanned Code','Scan Time','Matched Return ID','Result','SKU','Product','Quantity'],...state.logs.map(l=>[l.code,l.time,l.returnId,l.result,l.sku,l.product,l.qty])];XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(logRows),'Scan Log');let filename='TZInVManager_'+new Date().toISOString().slice(0,10)+'.xlsx';XLSX.writeFile(wb,filename);toast('Master Excel downloaded')}
+function backupJSON(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='TZInVManager_Backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);toast('Backup downloaded')}
+init();
+</script></body></html>
